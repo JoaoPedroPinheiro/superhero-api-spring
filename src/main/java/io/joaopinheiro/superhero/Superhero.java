@@ -56,11 +56,11 @@ public class Superhero {
 		this.pseudonym = pseudonym;
 	}
 
-	public List<Superhero> getAllies() {
+	public List<String> getAllies() {
 		return allies;
 	}
 
-	public void setAllies(List<Superhero> allies) {
+	public void setAllies(List<String> allies) {
 		this.allies = allies;
 	}
 
