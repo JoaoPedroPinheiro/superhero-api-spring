@@ -1,5 +1,6 @@
 package io.joaopinheiro.superhero;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +29,19 @@ public class SuperheroController {
 			return result.get();
 		} else {
 			//TODO: Build Error message as a response value. Use .orElseThrow(...)
-			return repository.findById(id).get();
+			return null;
 		}
 	}
-	
+
+	@GetMapping(path ="superheroes/{id}/allies", produces = "application/json")
+	public List<String> getSuperheroAllies(Long id){
+		Optional<Superhero> result = repository.findById(id);
+
+		if(result.isPresent()){
+			return result.get().getAllies();
+		} else return null;
+	}
+
 	@PostMapping(path="superheroes", consumes = "application/json")
 	public Superhero createSuperhero(@RequestBody Superhero hero) {
 		repository.save(hero);
