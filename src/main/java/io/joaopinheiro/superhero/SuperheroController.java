@@ -4,11 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/")
@@ -23,7 +19,7 @@ public class SuperheroController {
 	}
 	
 	@GetMapping(path = "superheroes/{id}", produces = "application/json")
-	public Superhero getSuperheroDetails(Long id) {
+	public Superhero getSuperheroDetails(@PathVariable("id") Long id) {
 		Optional<Superhero> result = repository.findById(id);
 		if(result.isPresent()){
 			return result.get();
@@ -34,7 +30,7 @@ public class SuperheroController {
 	}
 
 	@GetMapping(path ="superheroes/{id}/allies", produces = "application/json")
-	public List<String> getSuperheroAllies(Long id){
+	public List<String> getSuperheroAllies(@PathVariable("id") Long id){
 		Optional<Superhero> result = repository.findById(id);
 
 		if(result.isPresent()){
@@ -44,8 +40,16 @@ public class SuperheroController {
 
 	@PostMapping(path="superheroes", consumes = "application/json")
 	public Superhero createSuperhero(@RequestBody Superhero hero) {
+		Long id = hero.getId();
+
+		Optional<Superhero> result = repository.findById(id);
 		repository.save(hero);
 		return getSuperheroDetails(hero.getId());
+	}
+
+	@PutMapping(path = "superheroes/{id}", consumes = "application/json")
+	public void updateSuperhero(@RequestBody Superhero hero, @PathVariable("id") Long id){
+		repository.findById(id).ifPresent(value -> repository.save(hero));
 	}
 	
 }
