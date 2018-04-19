@@ -1,6 +1,8 @@
 package io.joaopinheiro.superhero;
 import java.util.Collection;
+import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,19 +13,29 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/")
 public class SuperheroController {
 
+	@Autowired
+	SuperheroRepository repository;
+
 	@GetMapping(path="superheroes",  produces = "application/json")
 	public Collection<Superhero> getAllSuperheroes(){
-		return null;
+		return repository.findAll();
 	}
 	
 	@GetMapping(path = "superheroes/{id}", produces = "application/json")
-	public Superhero getSuperheroDetails(String id) {
-		return null;
+	public Superhero getSuperheroDetails(Long id) {
+		Optional<Superhero> result = repository.findById(id);
+		if(result.isPresent()){
+			return result.get();
+		} else {
+			//TODO: Build Error message as a response value. Use .orElseThrow(...)
+			return repository.findById(id).get();
+		}
 	}
 	
 	@PostMapping(path="superheroes", consumes = "application/json")
-	public void createSuperhero(@RequestBody Superhero hero) {
-		
+	public Superhero createSuperhero(@RequestBody Superhero hero) {
+		repository.save(hero);
+		return getSuperheroDetails(hero.getId());
 	}
 	
 }
