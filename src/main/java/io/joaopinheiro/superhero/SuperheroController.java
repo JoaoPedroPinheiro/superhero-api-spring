@@ -3,6 +3,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import io.joaopinheiro.superhero.errors.SuperheroAlreadyExists;
+import io.joaopinheiro.superhero.errors.SuperheroNotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,36 +22,35 @@ public class SuperheroController {
 	
 	@GetMapping(path = "superheroes/{id}", produces = "application/json")
 	public Superhero getSuperheroDetails(@PathVariable("id") Long id) {
-		Optional<Superhero> result = repository.findById(id);
-		if(result.isPresent()){
-			return result.get();
-		} else {
-			//TODO: Build Error message as a response value. Use .orElseThrow(...)
-			return null;
-		}
+		Superhero result = repository.findById(id).orElseThrow(()-> new SuperheroNotFound("The Superhero with id : "+ id + " was not found"));;
+		return result;
+
 	}
 
 	@GetMapping(path ="superheroes/{id}/allies", produces = "application/json")
 	public List<String> getSuperheroAllies(@PathVariable("id") Long id){
-		Optional<Superhero> result = repository.findById(id);
-
-		if(result.isPresent()){
-			return result.get().getAllies();
-		} else return null;
+		Superhero result = repository.findById(id).orElseThrow(()-> new SuperheroNotFound("The Superhero with id : "+ id + " was not found"));
+		return result.getAllies();
 	}
 
 	@PostMapping(path="superheroes", consumes = "application/json")
 	public Superhero createSuperhero(@RequestBody Superhero hero) {
 		Long id = hero.getId();
+		if(id != null){
+			if(repository.findById(id).isPresent()){
+				throw new SuperheroAlreadyExists("A Superhero with the given id("+id+") already exists");
+			}
+		}
 
-		Optional<Superhero> result = repository.findById(id);
 		repository.save(hero);
 		return getSuperheroDetails(hero.getId());
 	}
 
 	@PutMapping(path = "superheroes/{id}", consumes = "application/json")
 	public void updateSuperhero(@RequestBody Superhero hero, @PathVariable("id") Long id){
-		repository.findById(id).ifPresent(value -> repository.save(hero));
+		repository.findById(id).orElseThrow(()-> new SuperheroNotFound("The Superhero with id : "+ id + " was not found"));
+		repository.save(hero);
+
 	}
 	
 }
