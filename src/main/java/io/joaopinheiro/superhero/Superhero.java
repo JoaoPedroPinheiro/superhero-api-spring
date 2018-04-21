@@ -23,6 +23,12 @@ public class Superhero {
 	
 	@ElementCollection(targetClass=String.class)
 	private List<String> allies;
+
+	@ElementCollection(targetClass=String.class)
+	private List<String> superpowers;
+
+	@Temporal(TemporalType.DATE)
+	private Date firstAppearance;
 	
 	public long getId() {
 		return id;
@@ -80,9 +86,18 @@ public class Superhero {
 		this.firstAppearance = firstAppearance;
 	}
 
-	@ElementCollection(targetClass=String.class)
-	private List<String> superpowers;
-	
-	@Temporal(TemporalType.DATE)
-	private Date firstAppearance;
+
+
+	@Override
+	public boolean equals(Object obj){
+		if(obj instanceof Superhero){
+			return (this.id == ((Superhero) obj).getId() &&
+					this.name.equals(((Superhero) obj).name) &&
+					this.pseudonym.equals(((Superhero) obj).getPseudonym()) &&
+					this.superpowers.equals(((Superhero) obj).getSuperpowers()) &&
+					this.allies.equals(((Superhero) obj).getAllies()) &&
+					this.publisher.equals(((Superhero) obj).getPublisher())&&
+					this.firstAppearance.equals(((Superhero) obj).getFirstAppearance()));
+		} else return false;
+	}
 }
