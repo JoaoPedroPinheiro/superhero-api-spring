@@ -1,4 +1,4 @@
-package io.joaopinheiro.superhero;
+package io.joaopinheiro.superhero.unit;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,6 +7,10 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.joaopinheiro.superhero.Superhero;
+import io.joaopinheiro.superhero.SuperheroController;
+import io.joaopinheiro.superhero.SuperheroRepository;
+import io.joaopinheiro.superhero.TestUtils;
 import io.joaopinheiro.superhero.errors.SuperheroNotFound;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,9 +42,6 @@ public class SuperheroControllerTest {
 
     @MockBean
     private SuperheroRepository repository;
-
-    @Autowired
-    private SuperheroController controller;
 
     ObjectMapper mapper = new ObjectMapper();
 
