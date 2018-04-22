@@ -3,6 +3,7 @@ package io.joaopinheiro.superhero;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,7 +46,7 @@ public class SuperheroControllerTest {
     @Test
     public void getAllSuperheroesEmpty() throws Exception{
         List<Superhero> allSuperheroes = Collections.emptyList();
-        given(controller.getAllSuperheroes()).willReturn(allSuperheroes);
+        given(repository.findAll()).willReturn(allSuperheroes);
 
 
         MvcResult result = mvc.perform(get("http://localhost:8080/superheroes").contentType(MediaType.APPLICATION_JSON))
@@ -60,7 +61,7 @@ public class SuperheroControllerTest {
     @Test
     public void getAllSuperheroesSingle() throws Exception {
         List<Superhero> allSuperheroes = Arrays.asList(TestUtils.BATMAN);
-        given(controller.getAllSuperheroes()).willReturn(allSuperheroes);
+        given(repository.findAll()).willReturn(allSuperheroes);
 
 
         MvcResult result = mvc.perform(get("http://localhost:8080/superheroes").contentType(MediaType.APPLICATION_JSON))
@@ -75,7 +76,7 @@ public class SuperheroControllerTest {
     @Test
     public void getAllSuperheroesMultiple() throws Exception{
         List<Superhero> allSuperheroes = Arrays.asList(TestUtils.BATMAN, TestUtils.HULK, TestUtils.SUPERMAN);
-        given(controller.getAllSuperheroes()).willReturn(allSuperheroes);
+        given(repository.findAll()).willReturn(allSuperheroes);
 
 
         MvcResult result = mvc.perform(get("http://localhost:8080/superheroes").contentType(MediaType.APPLICATION_JSON))
@@ -91,7 +92,8 @@ public class SuperheroControllerTest {
     public void getSuperheroDetailsSuccess() throws Exception{
         Long id = TestUtils.BATMAN.getId();
 
-        given(controller.getSuperheroDetails(id)).willReturn(TestUtils.BATMAN);
+        given(repository.findById(id)).willReturn(Optional.of(TestUtils.BATMAN));
+
         MvcResult result = mvc.perform(get("http://localhost:8080/superheroes/" + id).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
@@ -104,7 +106,7 @@ public class SuperheroControllerTest {
     public void getSuperheroDetailsNotFound() throws Exception{
         Long id = Long.MAX_VALUE;
 
-        given(controller.getSuperheroDetails(id)).willThrow(new SuperheroNotFound());
+        given(repository.findById(id)).willReturn(Optional.empty());
 
         mvc.perform(get("http://localhost:8080/superheroes/" + id).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
@@ -112,10 +114,9 @@ public class SuperheroControllerTest {
 
     @Test
     public void getSuperheroAllies() throws Exception{
-        List<String> allies = TestUtils.BATMAN.getAllies();
         Long id = TestUtils.BATMAN.getId();
 
-        given(controller.getSuperheroAllies(id)).willReturn(allies);
+        given(repository.findById(id)).willReturn(Optional.of(TestUtils.BATMAN));
 
         MvcResult result = mvc.perform(get("http://localhost:8080/superheroes/" + id + "/allies").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -123,13 +124,13 @@ public class SuperheroControllerTest {
 
         List<String> alliesResult = mapper.readValue(result.getResponse().getContentAsString(), new TypeReference<List<String>>(){});
         assertNotNull(alliesResult);
-        assertEquals(alliesResult, allies);
+        assertEquals(alliesResult, TestUtils.BATMAN.getAllies());
 
     }
 
     @Test
     public void getSuperheroAlliesNotFound() throws Exception{
-        given(controller.getSuperheroAllies(Long.MAX_VALUE)).willThrow(new SuperheroNotFound());
+        given(repository.findById(Long.MAX_VALUE)).willReturn(Optional.empty());
 
         mvc.perform(get("http://localhost:8080/superheroes/" + Long.MAX_VALUE + "/allies").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
@@ -140,8 +141,7 @@ public class SuperheroControllerTest {
     public void getSuperheroAlliesEmpty() throws Exception{
         Long id = TestUtils.SUPERMAN.getId();
 
-        given(controller.getSuperheroAllies(Long.MAX_VALUE)).willReturn(Collections.emptyList());
-
+        given(repository.findById(id)).willReturn(Optional.of(TestUtils.SUPERMAN));
         MvcResult result = mvc.perform(get("http://localhost:8080/superheroes/" + id + "/allies").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)))
@@ -152,22 +152,32 @@ public class SuperheroControllerTest {
         assertEquals(Collections.emptyList(), resultAllies);
     }
 
-
     @Test
-    public void createSuperhero() throws Exception{
+    public void createSuperheroSuccess() throws Exception{
 
-        given(controller.createSuperhero(TestUtils.BATMAN)).willReturn(TestUtils.BATMAN);
+        given(repository.findById(TestUtils.BATMAN.getId())).willReturn(Optional.empty());
+        given(repository.save(TestUtils.BATMAN)).willReturn(TestUtils.BATMAN);
 
         MvcResult result = mvc.perform(post("http://localhost:8080/superheroes")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(TestUtils.BATMAN)))
                 .andExpect(status().isOk())
                 .andReturn();
+    }
 
+    @Test
+    public void createSuperheroAlreadyExists() throws Exception{
+        given(repository.findById(TestUtils.BATMAN.getId())).willReturn(Optional.of(TestUtils.BATMAN));
+        mvc.perform(post("http://localhost:8080/superheroes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(TestUtils.BATMAN)))
+                .andExpect(status().isConflict())
+                .andReturn();
 
     }
 
     @Test
     public void updateSuperhero() {
+
     }
 }

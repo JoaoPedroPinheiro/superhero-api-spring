@@ -42,8 +42,7 @@ public class SuperheroController {
 			}
 		}
 
-		repository.save(hero);
-		return getSuperheroDetails(hero.getId());
+		return repository.save(hero);
 	}
 
 	@PutMapping(path = "superheroes/{id}", consumes = "application/json")
