@@ -20,8 +20,10 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,6 +35,9 @@ public class SuperheroControllerTest {
     private MockMvc mvc;
 
     @MockBean
+    private SuperheroRepository repository;
+
+    @Autowired
     private SuperheroController controller;
 
     ObjectMapper mapper = new ObjectMapper();
@@ -106,11 +111,60 @@ public class SuperheroControllerTest {
     }
 
     @Test
-    public void getSuperheroAllies() {
+    public void getSuperheroAllies() throws Exception{
+        List<String> allies = TestUtils.BATMAN.getAllies();
+        Long id = TestUtils.BATMAN.getId();
+
+        given(controller.getSuperheroAllies(id)).willReturn(allies);
+
+        MvcResult result = mvc.perform(get("http://localhost:8080/superheroes/" + id + "/allies").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        List<String> alliesResult = mapper.readValue(result.getResponse().getContentAsString(), new TypeReference<List<String>>(){});
+        assertNotNull(alliesResult);
+        assertEquals(alliesResult, allies);
+
     }
 
     @Test
-    public void createSuperhero() {
+    public void getSuperheroAlliesNotFound() throws Exception{
+        given(controller.getSuperheroAllies(Long.MAX_VALUE)).willThrow(new SuperheroNotFound());
+
+        mvc.perform(get("http://localhost:8080/superheroes/" + Long.MAX_VALUE + "/allies").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+    }
+
+    @Test
+    public void getSuperheroAlliesEmpty() throws Exception{
+        Long id = TestUtils.SUPERMAN.getId();
+
+        given(controller.getSuperheroAllies(Long.MAX_VALUE)).willReturn(Collections.emptyList());
+
+        MvcResult result = mvc.perform(get("http://localhost:8080/superheroes/" + id + "/allies").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)))
+                .andReturn();
+
+        List<String> resultAllies = mapper.readValue(result.getResponse().getContentAsString(), new TypeReference<List<String>>(){});
+        assertNotNull(resultAllies);
+        assertEquals(Collections.emptyList(), resultAllies);
+    }
+
+
+    @Test
+    public void createSuperhero() throws Exception{
+
+        given(controller.createSuperhero(TestUtils.BATMAN)).willReturn(TestUtils.BATMAN);
+
+        MvcResult result = mvc.perform(post("http://localhost:8080/superheroes")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(TestUtils.BATMAN)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+
     }
 
     @Test
