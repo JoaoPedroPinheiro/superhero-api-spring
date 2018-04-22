@@ -6,11 +6,13 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.joaopinheiro.superhero.errors.SuperheroNotFound;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -91,6 +93,16 @@ public class SuperheroControllerTest {
 
         Superhero resultHero = mapper.readValue(result.getResponse().getContentAsString(), Superhero.class);
         assertEquals(TestUtils.BATMAN, resultHero);
+    }
+
+    @Test
+    public void getSuperheroDetailsNotFound() throws Exception{
+        Long id = Long.MAX_VALUE;
+
+        given(controller.getSuperheroDetails(id)).willThrow(new SuperheroNotFound());
+
+        mvc.perform(get("http://localhost:8080/superheroes/" + id).contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 
     @Test
