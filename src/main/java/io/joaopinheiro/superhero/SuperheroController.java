@@ -46,10 +46,9 @@ public class SuperheroController {
 	}
 
 	@PutMapping(path = "superheroes/{id}", consumes = "application/json")
-	public void updateSuperhero(@RequestBody Superhero hero, @PathVariable("id") Long id){
+	public Superhero updateSuperhero(@RequestBody Superhero hero, @PathVariable("id") Long id){
 		repository.findById(id).orElseThrow(()-> new SuperheroNotFound("The Superhero with id : "+ id + " was not found"));
-		repository.save(hero);
-
+		return repository.save(hero);
 	}
 	
 }

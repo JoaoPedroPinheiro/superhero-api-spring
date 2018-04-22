@@ -25,6 +25,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -171,13 +172,28 @@ public class SuperheroControllerTest {
         mvc.perform(post("http://localhost:8080/superheroes")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(TestUtils.BATMAN)))
-                .andExpect(status().isConflict())
-                .andReturn();
-
+                .andExpect(status().isConflict());
     }
 
     @Test
-    public void updateSuperhero() {
+    public void updateSuperheroNotFound() throws Exception{
+        given(repository.findById(TestUtils.SUPERMAN.getId())).willReturn(Optional.empty());
+        mvc.perform(put("http://localhost:8080/superheroes/" + TestUtils.SUPERMAN.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(TestUtils.SUPERMAN)))
+                .andExpect(status().isNotFound())
+                .andReturn();
+    }
+
+    @Test
+    public void updateSuperheroSuccess() throws Exception{
+        given(repository.findById(TestUtils.SUPERMAN.getId())).willReturn(Optional.of(new Superhero()));
+
+        mvc.perform(put("http://localhost:8080/superheroes/" + TestUtils.SUPERMAN.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(TestUtils.SUPERMAN)))
+                .andExpect(status().isOk());
+
 
     }
 }
