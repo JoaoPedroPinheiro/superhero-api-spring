@@ -3,7 +3,7 @@ Sample [Spring Boot](http://projects.spring.io/spring-boot/) app.
 
 
 
-##Requirements
+## Requirements
 
 To build and run the application you need: 
 
