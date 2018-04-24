@@ -1,4 +1,4 @@
-# Superhero API
+# Superhero API [![Build Status](https://travis-ci.org/JoaoPedroPinheiro/superhero-api-spring.svg?branch=master)](https://travis-ci.org/JoaoPedroPinheiro/superhero-api-spring)
 Sample [Spring Boot](http://projects.spring.io/spring-boot/) app.
 
 
