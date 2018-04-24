@@ -29,7 +29,19 @@ public class Superhero {
 
 	@Temporal(TemporalType.DATE)
 	private Date firstAppearance;
-	
+
+	public Superhero(){};
+
+	public Superhero(long id, String name, String publisher, String pseudonym, List<String> allies, List<String> superpowers, Date firstAppearance) {
+		this.id = id;
+		this.name = name;
+		this.publisher = publisher;
+		this.pseudonym = pseudonym;
+		this.allies = allies;
+		this.superpowers = superpowers;
+		this.firstAppearance = firstAppearance;
+	}
+
 	public long getId() {
 		return id;
 	}

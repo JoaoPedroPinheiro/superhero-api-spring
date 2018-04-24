@@ -7,10 +7,7 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.joaopinheiro.superhero.Superhero;
-import io.joaopinheiro.superhero.SuperheroController;
-import io.joaopinheiro.superhero.SuperheroRepository;
-import io.joaopinheiro.superhero.TestUtils;
+import io.joaopinheiro.superhero.*;
 import io.joaopinheiro.superhero.errors.SuperheroNotFound;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,7 +59,10 @@ public class SuperheroControllerTest {
 
     @Test
     public void getAllSuperheroesSingle() throws Exception {
-        List<Superhero> allSuperheroes = Arrays.asList(TestUtils.BATMAN);
+
+        Superhero hero = new SuperheroBuilder().build();
+
+        List<Superhero> allSuperheroes = Arrays.asList(hero);
         given(repository.findAll()).willReturn(allSuperheroes);
 
 
@@ -77,7 +77,11 @@ public class SuperheroControllerTest {
 
     @Test
     public void getAllSuperheroesMultiple() throws Exception{
-        List<Superhero> allSuperheroes = Arrays.asList(TestUtils.BATMAN, TestUtils.HULK, TestUtils.SUPERMAN);
+        Superhero hero1 = new SuperheroBuilder().build();
+        Superhero hero2 = new SuperheroBuilder().build();
+        Superhero hero3 = new SuperheroBuilder().build();
+
+        List<Superhero> allSuperheroes = Arrays.asList(hero1, hero2, hero3);
         given(repository.findAll()).willReturn(allSuperheroes);
 
 
@@ -92,16 +96,17 @@ public class SuperheroControllerTest {
 
     @Test
     public void getSuperheroDetailsSuccess() throws Exception{
-        Long id = TestUtils.BATMAN.getId();
+        Superhero hero = new SuperheroBuilder().build();
+        Long id = hero.getId();
 
-        given(repository.findById(id)).willReturn(Optional.of(TestUtils.BATMAN));
+        given(repository.findById(id)).willReturn(Optional.of(hero));
 
         MvcResult result = mvc.perform(get("http://localhost:8080/superheroes/" + id).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
 
         Superhero resultHero = mapper.readValue(result.getResponse().getContentAsString(), Superhero.class);
-        assertEquals(TestUtils.BATMAN, resultHero);
+        assertEquals(hero, resultHero);
     }
 
     @Test
@@ -116,9 +121,10 @@ public class SuperheroControllerTest {
 
     @Test
     public void getSuperheroAllies() throws Exception{
-        Long id = TestUtils.BATMAN.getId();
+        Superhero hero = new SuperheroBuilder().build();
+        Long id = hero.getId();
 
-        given(repository.findById(id)).willReturn(Optional.of(TestUtils.BATMAN));
+        given(repository.findById(id)).willReturn(Optional.of(hero));
 
         MvcResult result = mvc.perform(get("http://localhost:8080/superheroes/" + id + "/allies").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -126,7 +132,7 @@ public class SuperheroControllerTest {
 
         List<String> alliesResult = mapper.readValue(result.getResponse().getContentAsString(), new TypeReference<List<String>>(){});
         assertNotNull(alliesResult);
-        assertEquals(alliesResult, TestUtils.BATMAN.getAllies());
+        assertEquals(alliesResult, hero.getAllies());
 
     }
 
@@ -141,9 +147,10 @@ public class SuperheroControllerTest {
 
     @Test
     public void getSuperheroAlliesEmpty() throws Exception{
-        Long id = TestUtils.SUPERMAN.getId();
+        Superhero hero = new SuperheroBuilder().withAllies().build();
+        Long id = hero.getId();
 
-        given(repository.findById(id)).willReturn(Optional.of(TestUtils.SUPERMAN));
+        given(repository.findById(id)).willReturn(Optional.of(hero));
         MvcResult result = mvc.perform(get("http://localhost:8080/superheroes/" + id + "/allies").contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)))
@@ -157,42 +164,50 @@ public class SuperheroControllerTest {
     @Test
     public void createSuperheroSuccess() throws Exception{
 
-        given(repository.findById(TestUtils.BATMAN.getId())).willReturn(Optional.empty());
-        given(repository.save(TestUtils.BATMAN)).willReturn(TestUtils.BATMAN);
+        Superhero hero = new SuperheroBuilder().build();
+
+        given(repository.findById(hero.getId())).willReturn(Optional.empty());
+        given(repository.save(hero)).willReturn(hero);
 
         MvcResult result = mvc.perform(post("http://localhost:8080/superheroes")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(TestUtils.BATMAN)))
+                .content(mapper.writeValueAsString(hero)))
                 .andExpect(status().isOk())
                 .andReturn();
     }
 
     @Test
     public void createSuperheroAlreadyExists() throws Exception{
-        given(repository.findById(TestUtils.BATMAN.getId())).willReturn(Optional.of(TestUtils.BATMAN));
+        Superhero hero = new SuperheroBuilder().build();
+
+        given(repository.findById(hero.getId())).willReturn(Optional.of(hero));
         mvc.perform(post("http://localhost:8080/superheroes")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(TestUtils.BATMAN)))
+                .content(mapper.writeValueAsString(hero)))
                 .andExpect(status().isConflict());
     }
 
     @Test
     public void updateSuperheroNotFound() throws Exception{
-        given(repository.findById(TestUtils.SUPERMAN.getId())).willReturn(Optional.empty());
-        mvc.perform(put("http://localhost:8080/superheroes/" + TestUtils.SUPERMAN.getId())
+        Superhero hero = new SuperheroBuilder().build();
+
+        given(repository.findById(hero.getId())).willReturn(Optional.empty());
+        mvc.perform(put("http://localhost:8080/superheroes/" + hero.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(TestUtils.SUPERMAN)))
+                .content(mapper.writeValueAsString(hero)))
                 .andExpect(status().isNotFound())
                 .andReturn();
     }
 
     @Test
     public void updateSuperheroSuccess() throws Exception{
-        given(repository.findById(TestUtils.SUPERMAN.getId())).willReturn(Optional.of(new Superhero()));
+        Superhero hero = new SuperheroBuilder().build();
 
-        mvc.perform(put("http://localhost:8080/superheroes/" + TestUtils.SUPERMAN.getId())
+        given(repository.findById(hero.getId())).willReturn(Optional.of(new Superhero()));
+
+        mvc.perform(put("http://localhost:8080/superheroes/" + hero.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(TestUtils.SUPERMAN)))
+                .content(mapper.writeValueAsString(hero)))
                 .andExpect(status().isOk());
 
 
