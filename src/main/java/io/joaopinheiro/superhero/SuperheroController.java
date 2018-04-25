@@ -1,7 +1,6 @@
 package io.joaopinheiro.superhero;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import io.joaopinheiro.superhero.errors.SuperheroAlreadyExists;
 import io.joaopinheiro.superhero.errors.SuperheroNotFound;
