@@ -7,6 +7,9 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.joaopinheiro.superhero.*;
 import io.joaopinheiro.superhero.errors.SuperheroNotFound;
 import org.junit.Test;
@@ -41,6 +44,10 @@ public class SuperheroControllerTest {
     private SuperheroRepository repository;
 
     ObjectMapper mapper = new ObjectMapper();
+    {
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
 
     @Test
     public void getAllSuperheroesEmpty() throws Exception{
