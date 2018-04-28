@@ -212,4 +212,9 @@ public class SuperheroControllerTest {
 
 
     }
+
+    @Test
+    public void createSuperheroMalformedDate() throws Exception{
+   //     Superhero hero = new SuperheroBuilder()
+    }
 }

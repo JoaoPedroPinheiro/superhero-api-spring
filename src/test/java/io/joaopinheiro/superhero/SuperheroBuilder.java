@@ -1,5 +1,6 @@
 package io.joaopinheiro.superhero;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +18,7 @@ public class SuperheroBuilder {
     private String pseudonym = "default date";
     private List<String> allies = Arrays.asList("default ally 1", "default ally 2");
     private List<String> superpowers = Arrays.asList("default superpower 1", "default superpower 2");
-    private Date firstAppearance = new Date();
+    private LocalDate firstAppearance = LocalDate.now();
 
     public SuperheroBuilder(){};
 
@@ -51,7 +52,7 @@ public class SuperheroBuilder {
         return this;
     }
 
-    public SuperheroBuilder withfirstAppearance(Date date){
+    public SuperheroBuilder withfirstAppearance(LocalDate date){
         this.firstAppearance = date;
         return this;
     }

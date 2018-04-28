@@ -1,14 +1,14 @@
 package io.joaopinheiro.superhero;
 
-import java.util.Date;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 @Entity
 @Table(name= "superhero")
@@ -27,12 +27,12 @@ public class Superhero {
 	@ElementCollection(targetClass=String.class)
 	private List<String> superpowers;
 
-	@Temporal(TemporalType.DATE)
-	private Date firstAppearance;
+	@DateTimeFormat(pattern = "yyyy-mm-dd")
+	private LocalDate firstAppearance;
 
 	public Superhero(){};
 
-	public Superhero(long id, String name, String publisher, String pseudonym, List<String> allies, List<String> superpowers, Date firstAppearance) {
+	public Superhero(long id, String name, String publisher, String pseudonym, List<String> allies, List<String> superpowers, LocalDate firstAppearance) {
 		this.id = id;
 		this.name = name;
 		this.publisher = publisher;
@@ -90,11 +90,11 @@ public class Superhero {
 		this.superpowers = superpowers;
 	}
 
-	public Date getFirstAppearance() {
+	public LocalDate getFirstAppearance() {
 		return firstAppearance;
 	}
 
-	public void setFirstAppearance(Date firstAppearance) {
+	public void setFirstAppearance(LocalDate firstAppearance) {
 		this.firstAppearance = firstAppearance;
 	}
 
